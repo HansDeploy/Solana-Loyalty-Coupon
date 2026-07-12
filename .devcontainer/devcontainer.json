@@ -1,20 +1,46 @@
 {
-  "name": "Solana Dev Environment",
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-    "ghcr.io/devcontainers/features/rust:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
-    }
+  "name": "Solana & Anchor Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/rust:latest",
+  
+  "postCreateCommand": {
+    "install_solana": "sh -c \"$(curl -sSfL https://release.solana.com/v1.18.18/install)\"",
+    "install_anchor": "cargo install --git https://github.com/coral-xyz/anchor avm --locked && avm install latest && avm use latest",
+    "install_node": "curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && apt-get install -y nodejs",
+    "install_yarn": "npm install --global yarn",
+    "post_install": "solana --version && anchor --version && node --version"
   },
-  "postCreateCommand": "sh -c \"$(curl -sSfL https://release.solana.com/stable/install)\" && export PATH=\"$HOME/.local/share/solana/install/active_release/bin:$PATH\" && echo 'export PATH=\"$HOME/.local/share/solana/install/active_release/bin:\\$PATH\"' >> ~/.bashrc && cargo install --git https://github.com/coral-xyz/anchor avm --locked && avm install latest && avm use latest",
+
   "customizations": {
     "vscode": {
       "extensions": [
         "rust-lang.rust-analyzer",
-        "anchor-anchor.anchor",
-        "solana.solana"
-      ]
+        "solana.solana",
+        "github.copilot",
+        "github.copilot-chat",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+        "rust-analyzer.checkOnSave.command": "clippy",
+        "rust-analyzer.cargo.features": "all",
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "copilot.enable": true,
+        "copilot.editor.enableAutoCompletions": true
+      }
     }
-  }
+  },
+
+  "forwardPorts": [8899, 8900, 8901],
+  "portsAttributes": {
+    "8899": {
+      "label": "Solana RPC",
+      "onAutoForward": "ignore"
+    }
+  },
+
+  "remoteUser": "vscode",
+  "updateContentCommand": "solana config set --url https://api.devnet.solana.com && anchor build"
 }
